@@ -83,6 +83,7 @@ The script must:
    - `Marketing contact status` equals `"Marketing contact"` (column may be named `Marketing contact status` or `hs_marketable_status`)
    - NOT opted out of email (check `Opted out of email: Marketing Information` or relevant subscription columns — value should NOT be `"Opted Out"`)
    - NOT globally unsubscribed (check `Unsubscribed from all email` — value should NOT be `"True"` or `"Yes"`)
+   - NOT hard bounced (check `Email hard bounce reason` or `Bounced` — any non-empty value means permanently undeliverable). Hard-bounced contacts will never receive email regardless of list membership, and they distribute unevenly across groups, skewing your test.
    - NOT unengaged — filter out contacts where `Sends Since Last Engagement` is high (>5) or `Marketing emails opened`/`Marketing emails clicked` are both 0. This prevents HubSpot's "Don't send to unengaged contacts" toggle from unevenly trimming groups at send time.
 3. Deduplicate by email (case-insensitive, keep first occurrence)
 4. Print a summary: total contacts, eligible contacts, filtered-out breakdown (including unengaged count)
