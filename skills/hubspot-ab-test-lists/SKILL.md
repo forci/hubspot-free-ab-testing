@@ -1,6 +1,6 @@
 ---
 name: hubspot-ab-test-lists
-version: 1.0.0
+version: 1.1.0
 description: >
   Create A/B (or A/B/C/…) split test contact lists for HubSpot email campaigns.
   Designed for HubSpot Starter and Free plans that lack native A/B testing.
@@ -83,8 +83,9 @@ The script must:
    - `Marketing contact status` equals `"Marketing contact"` (column may be named `Marketing contact status` or `hs_marketable_status`)
    - NOT opted out of email (check `Opted out of email: Marketing Information` or relevant subscription columns — value should NOT be `"Opted Out"`)
    - NOT globally unsubscribed (check `Unsubscribed from all email` — value should NOT be `"True"` or `"Yes"`)
+   - NOT unengaged — filter out contacts where `Sends Since Last Engagement` is high (>5) or `Marketing emails opened`/`Marketing emails clicked` are both 0. This prevents HubSpot's "Don't send to unengaged contacts" toggle from unevenly trimming groups at send time.
 3. Deduplicate by email (case-insensitive, keep first occurrence)
-4. Print a summary: total contacts, eligible contacts, filtered-out breakdown
+4. Print a summary: total contacts, eligible contacts, filtered-out breakdown (including unengaged count)
 
 Example script structure (generate this, do NOT store it as a file):
 
@@ -236,7 +237,7 @@ For each CSV file, walk the user through:
 3. Select: File from computer > One file > One object > Contacts
 4. Upload the CSV file
 5. Map the `Email` column to the Email property (usually auto-detected)
-6. Name the import descriptively: `{Campaign Name} - Variant {Letter}`
+6. Name the import using the **variant's distinguishing trait**, not just a letter: `{Campaign Name} - {what makes this variant different}`. Example: `Survey Test A - with form link`, `Survey Test B - without form link`. Confirm each name with the user before importing — a mislabeled segment causes confusion when sending and evaluating.
 7. **Check "Create a contacts segment"** — this creates the static list for email targeting
 8. Accept the data processing agreement
 9. Click **Finish import**
@@ -262,6 +263,8 @@ Send mapping:
 
 In HubSpot's email editor, under **Send to**, select the corresponding static list/segment.
 
+**Critical: Uncheck "Don't send to unengaged contacts"** in the send settings. This filter runs AFTER segment selection and removes different numbers from each group (e.g., 3 from group A but only 2 from group B), destroying equal group sizes and invalidating the test. The filtering script already excluded unengaged contacts before splitting, so this toggle is redundant and harmful.
+
 ### Step 8: Evaluate & Send Winner
 
 After the test period (recommend **3-5 business days** for reliable data):
@@ -276,6 +279,8 @@ After the test period (recommend **3-5 business days** for reliable data):
 
 ## Common Mistakes
 
+- **Leaving "Don't send to unengaged contacts" checked**: This is the #1 test-killer. HubSpot's unengaged filter runs at send time and removes different numbers from each group, making them unequal (e.g., 17/20 vs 18/20 vs 20/20). Always uncheck it — the filtering script already excludes unengaged contacts before splitting.
+- **Mislabeling segments during import**: Name each segment by its distinguishing trait (`Survey Test A - with form link`), not generically. If variant B is "without form link", don't name its segment "with form link". Double-check names before finishing each import — renaming segments after the fact is possible but easy to forget.
 - **Sending to non-marketing contacts**: HubSpot silently skips non-marketing contacts. The filtering step catches this, but double-check if your eligible count seems low.
 - **Skipping unsubscribe checks**: Importing opted-out contacts into a segment doesn't override their opt-out — HubSpot still blocks the send — but it inflates your segment size and skews metrics.
 - **Peeking at results too early**: Open/click tracking needs time. Checking after 2 hours gives misleading data. Wait at least 3 business days.
