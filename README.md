@@ -1,33 +1,36 @@
-# HubSpot Toolkit
+# HubSpot Free A/B Testing
 
-HubSpot tools for Starter/Free plans — skills, automations, and utilities that bring enterprise features to every HubSpot tier.
+A/B test your HubSpot email campaigns — no Marketing Hub Professional required.
 
-## Skills
+HubSpot Free and Starter plans don't include native A/B testing. This skill gives you the same workflow: split your contacts into randomized groups, send different email variants to each, measure results, and send the winner to everyone else.
 
-### hubspot-ab-test-lists
+Works with any number of variants (A/B, A/B/C, ...) and any contact list size.
 
-A/B (and A/B/C/…) split test lists for HubSpot email campaigns — no Marketing Hub Professional required.
+## What it does
 
-Takes your contact list, filters for eligible marketing contacts, randomizes them into equal groups, and produces import-ready CSV files for HubSpot static segments. Works with any number of email variants.
+1. Takes your HubSpot contact export (CSV) or pulls contacts via API
+2. Filters for eligible marketing contacts (removes unsubscribed, non-marketing, duplicates)
+3. Randomizes contacts into equal groups — one per email variant
+4. Generates import-ready CSV files for HubSpot static segments
+5. Walks you through importing, sending, evaluating results, and sending the winner
 
-**Install:**
+## Install
+
+This is a [Claude Code skill](https://skills.sh). Install it with:
 
 ```bash
-npx skills add forci/hubspot-toolkit@hubspot-ab-test-lists
+npx skills add forci/hubspot-free-ab-testing
 ```
 
-**Triggers on:** "split test", "A/B test emails", "create test segments", "randomize contacts for email test"
+Then ask Claude: _"I want to A/B test an email campaign in HubSpot"_
 
-## n8n Automations
+Also works with Cursor, Windsurf, Codex, and other AI coding agents.
 
-_Coming soon_ — reusable n8n workflows for HubSpot Starter/Free plans.
+## Requirements
 
-## Contributing
-
-1. Fork the repo
-2. Create a feature branch
-3. Follow existing patterns (skills in `skills/`, n8n workflows in `n8n/`)
-4. Open a PR with a clear description of what the tool does and which HubSpot tier it targets
+- HubSpot account (Free or Starter) with contacts
+- Email variants already drafted in HubSpot
+- Python 3 (for contact filtering — script is generated on-the-fly, nothing to install)
 
 ## License
 
