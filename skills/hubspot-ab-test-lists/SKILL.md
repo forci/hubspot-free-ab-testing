@@ -1,6 +1,6 @@
 ---
 name: hubspot-ab-test-lists
-version: 1.1.0
+version: 1.2.0
 description: >
   Create A/B (or A/B/C/…) split test contact lists for HubSpot email campaigns.
   Designed for HubSpot Starter and Free plans that lack native A/B testing.
@@ -251,22 +251,50 @@ See `references/hubspot-import-walkthrough.md` for detailed guidance and trouble
 
 Provide the CSV file paths and tell the user to import them manually into HubSpot, reminding them to check "Create a contacts segment" for each import.
 
-### Step 7: Send Emails
+### Step 7: Verify Segments & Fix Gaps
 
-After all segments are imported, guide the user to send each email variant to its corresponding segment:
+After importing, open each segment in HubSpot and check the **actual deliverable count** (not just segment size). HubSpot shows send-readiness when you select a segment in the email editor — it subtracts bounced, unsubscribed, and unengaged contacts.
+
+1. Navigate to **CRM > Lists/Segments** (or `https://app-{region}.hubspot.com/contacts/{portalId}/lists`)
+2. Open each test segment and note the total count
+3. If any segment has fewer deliverable contacts than others (due to bounced/unengaged contacts landing in that group), **add replacement contacts** from the pool of contacts not in any test segment:
+   - Go to Contacts, filter by "Segment membership is none of" all test segments
+   - Select the needed number of contacts
+   - Use **More > Add to static segment** to add them to the short segment
+4. Repeat until all test segments have equal deliverable counts
+
+Display the final state to the user:
 
 ```
-Send mapping:
-- "{Variant A name}" → send to segment "{Campaign} - Variant A"
-- "{Variant B name}" → send to segment "{Campaign} - Variant B"
-- "{Variant C name}" → send to segment "{Campaign} - Variant C" (if applicable)
+Segment verification:
+- {Segment A name}: {count} contacts ✓
+- {Segment B name}: {count} contacts ✓
+- {Segment C name}: {count} contacts ✓ (if applicable)
+All groups equal — ready to send.
 ```
 
-In HubSpot's email editor, under **Send to**, select the corresponding static list/segment.
+### Step 8: Hand Off to User for Sending
 
-**Critical: Uncheck "Don't send to unengaged contacts"** in the send settings. This filter runs AFTER segment selection and removes different numbers from each group (e.g., 3 from group A but only 2 from group B), destroying equal group sizes and invalidating the test. The filtering script already excluded unengaged contacts before splitting, so this toggle is redundant and harmful.
+**Do not send emails programmatically.** Provide the user with everything they need to send manually:
 
-### Step 8: Evaluate & Send Winner
+```
+Ready to send! Here's your mapping:
+
+1. "{Variant A name}" → send to segment "{Campaign} - Variant A"
+   HubSpot link: https://app-{region}.hubspot.com/contacts/{portalId}/lists
+
+2. "{Variant B name}" → send to segment "{Campaign} - Variant B"
+
+3. "{Variant C name}" → send to segment "{Campaign} - Variant C" (if applicable)
+
+⚠️  IMPORTANT: In each email's send settings, UNCHECK "Don't send to unengaged contacts".
+    This filter runs AFTER segment selection and removes different numbers from each group,
+    destroying equal group sizes. The contacts were already filtered before splitting.
+```
+
+The user should open each email draft in HubSpot, select the corresponding segment under **Send to**, uncheck the unengaged toggle, and send.
+
+### Step 9: Evaluate & Send Winner
 
 After the test period (recommend **3-5 business days** for reliable data):
 
